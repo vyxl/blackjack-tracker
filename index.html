@@ -360,18 +360,22 @@
             };
 
             sessions.push(session);
+            saveData();
             updateDisplay();
             clearForm();
         }
 
         function removeSession(sessionId) {
-            for (var i = 0; i < sessions.length; i++) {
-                if (sessions[i].id == sessionId) {
-                    sessions.splice(i, 1);
-                    break;
+            if (confirm('Are you sure you want to delete this session?')) {
+                for (var i = 0; i < sessions.length; i++) {
+                    if (sessions[i].id == sessionId) {
+                        sessions.splice(i, 1);
+                        break;
+                    }
                 }
+                saveData();
+                updateDisplay();
             }
-            updateDisplay();
         }
 
         function updateDisplay() {
@@ -449,6 +453,22 @@
             document.getElementById('notes').value = '';
         }
 
+        function saveData() {
+            localStorage.setItem('blackjack-sessions', JSON.stringify(sessions));
+            localStorage.setItem('blackjack-nextid', nextId.toString());
+        }
+
+        function loadData() {
+            var saved = localStorage.getItem('blackjack-sessions');
+            if (saved) {
+                sessions = JSON.parse(saved);
+            }
+            var savedId = localStorage.getItem('blackjack-nextid');
+            if (savedId) {
+                nextId = parseInt(savedId);
+            }
+        }
+
         function exportData() {
             if (sessions.length === 0) {
                 alert('No sessions to export');
@@ -473,13 +493,17 @@
         }
 
         function clearAllData() {
-            sessions = [];
-            nextId = 1;
-            updateDisplay();
+            if (confirm('Are you sure you want to clear all session data? This cannot be undone.')) {
+                sessions = [];
+                nextId = 1;
+                saveData();
+                updateDisplay();
+            }
         }
 
         // Initialize
         window.onload = function() {
+            loadData();
             updateDisplay();
             document.getElementById('date').valueAsDate = new Date();
         };
